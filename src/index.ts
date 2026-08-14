@@ -7,7 +7,7 @@ import { createAuth } from "./auth";
 
 const auth = createAuth(env);
 
-const handler = createMcpHandler(() => {
+const handler = createMcpHandler(({ authInfo }) => {
 	const server = new McpServer({ name: "notes", version: "1.0.0" });
 
 	server.registerTool(
@@ -20,6 +20,24 @@ const handler = createMcpHandler(() => {
 			content: [{ type: "text", text: `Saved: ${text}` }],
 		}),
 	);
+
+	const groups = z.array(z.string()).safeParse(authInfo?.extra?.groups);
+
+	const canDelete =
+		groups.success && groups.data.includes(env.ENTRA_DESTRUCTIVE_GROUP_ID);
+
+	if (canDelete) {
+		server.registerTool(
+			"delete-note",
+			{
+				description: "Delete a note",
+				inputSchema: z.object({ id: z.string() }),
+			},
+			async ({ id }) => ({
+				content: [{ type: "text", text: `Deleted: ${id}` }],
+			}),
+		);
+	}
 
 	return server;
 });

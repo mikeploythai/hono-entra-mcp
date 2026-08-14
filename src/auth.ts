@@ -18,6 +18,7 @@ const accessTokenSchema = z.object({
 	roles: z.array(z.string()).default([]),
 	exp: z.number().int().positive(),
 	ver: z.literal("1.0"),
+	groups: z.array(z.string()).default([]),
 });
 
 export const createAuth = (env: CloudflareBindings) => {
@@ -38,8 +39,15 @@ export const createAuth = (env: CloudflareBindings) => {
 						audience: resourceUrl.href,
 						algorithms: ["RS256"],
 					});
+
 					const claims = accessTokenSchema.parse(result.payload);
 					if (claims.tid !== env.ENTRA_TENANT_ID) throw new Error();
+					if (!claims.groups.includes(env.ENTRA_ALLOWED_GROUP_ID)) {
+						throw new OAuthError(
+							OAuthErrorCode.InsufficientScope,
+							"User is not authorized to access this MCP server",
+						);
+					}
 
 					const scopes = claims.scp.split(" ").filter(Boolean);
 
@@ -56,9 +64,11 @@ export const createAuth = (env: CloudflareBindings) => {
 							objectId: claims.oid,
 							tenantId: claims.tid,
 							roles: claims.roles,
+							groups: claims.groups,
 						},
 					};
-				} catch {
+				} catch (error) {
+					if (error instanceof OAuthError) throw error;
 					throw new OAuthError(
 						OAuthErrorCode.InvalidToken,
 						"Invalid or expired Entra access token",

@@ -4,10 +4,12 @@ import { createMcpHandler, McpServer } from "@modelcontextprotocol/server";
 import type { Context } from "hono";
 import z from "zod";
 import { createAuth } from "./auth";
+import { createGroupAuthorizer } from "./graph";
 
 const auth = createAuth(env);
+const isGroupMember = createGroupAuthorizer(env);
 
-const handler = createMcpHandler(({ authInfo }) => {
+const handler = createMcpHandler(async ({ authInfo }) => {
 	const server = new McpServer({ name: "notes", version: "1.0.0" });
 
 	server.registerTool(
@@ -21,10 +23,17 @@ const handler = createMcpHandler(({ authInfo }) => {
 		}),
 	);
 
-	const groups = z.array(z.string()).safeParse(authInfo?.extra?.groups);
+	const userId = z.string().min(1).safeParse(authInfo?.extra?.objectId);
+	let canDelete = false;
 
-	const canDelete =
-		groups.success && groups.data.includes(env.ENTRA_DESTRUCTIVE_GROUP_ID);
+	if (userId.success) {
+		try {
+			canDelete = await isGroupMember(
+				userId.data,
+				env.ENTRA_DESTRUCTIVE_GROUP_ID,
+			);
+		} catch {}
+	}
 
 	if (canDelete) {
 		server.registerTool(

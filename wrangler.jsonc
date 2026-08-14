@@ -7,6 +7,7 @@
 		"MCP_ALLOWED_HOSTS": ["ai.ploythai.dev", "localhost"],
 		"MCP_SERVER_URL": "https://ai.ploythai.dev/mcp",
 		"ENTRA_TENANT_ID": "728d01ce-27d1-40a2-a73d-aaa7dd20eb46",
+		"ENTRA_CLIENT_ID": "51d793d9-b455-4296-a4ae-f011e44a0059",
 		"ENTRA_ALLOWED_GROUP_ID": "f1f62f3e-b071-4d40-9da8-ac5fe78a2b6a",
 		"ENTRA_DESTRUCTIVE_GROUP_ID": "85e0d487-2687-43f5-a548-f37ce369d85d"
 	}

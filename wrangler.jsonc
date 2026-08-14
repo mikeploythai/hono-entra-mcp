@@ -4,7 +4,9 @@
 	"main": "src/index.ts",
 	"compatibility_date": "2026-08-14",
 	"vars": {
-		"MCP_ALLOWED_HOSTS": ["ai.ploythai.dev", "localhost"]
+		"MCP_ALLOWED_HOSTS": ["ai.ploythai.dev", "localhost"],
+		"MCP_SERVER_URL": "https://ai.ploythai.dev/mcp",
+		"ENTRA_TENANT_ID": "728d01ce-27d1-40a2-a73d-aaa7dd20eb46"
 	}
 	// "compatibility_flags": [
 	//   "nodejs_compat"

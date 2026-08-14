@@ -3,6 +3,9 @@ import { createMcpHonoApp } from "@modelcontextprotocol/hono";
 import { createMcpHandler, McpServer } from "@modelcontextprotocol/server";
 import type { Context } from "hono";
 import z from "zod";
+import { createAuth } from "./auth";
+
+const auth = createAuth(env);
 
 const handler = createMcpHandler(() => {
 	const server = new McpServer({ name: "notes", version: "1.0.0" });
@@ -29,8 +32,20 @@ const app = createMcpHonoApp({
 
 app.get("/health", (c) => c.json({ status: "ok" }));
 
-app.all("/mcp", (c: Context) =>
-	handler.fetch(c.req.raw, { parsedBody: c.get("parsedBody") }),
-);
+app.use("*", async (c, next) => {
+	const response = auth.metadata(c.req.raw);
+	if (response) return response;
+	await next();
+});
+
+app.all("/mcp", async (c: Context) => {
+	const authInfo = await auth.authenticate(c.req.raw);
+	if (authInfo instanceof Response) return authInfo;
+
+	return handler.fetch(c.req.raw, {
+		parsedBody: c.get("parsedBody"),
+		authInfo,
+	});
+});
 
 export default app;

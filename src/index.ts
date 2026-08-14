@@ -1,3 +1,4 @@
+import { env } from "cloudflare:workers";
 import { createMcpHonoApp } from "@modelcontextprotocol/hono";
 import { createMcpHandler, McpServer } from "@modelcontextprotocol/server";
 import type { Context } from "hono";
@@ -20,7 +21,11 @@ const handler = createMcpHandler(() => {
 	return server;
 });
 
-const app = createMcpHonoApp();
+const app = createMcpHonoApp({
+	host: "0.0.0.0",
+	allowedHosts: env.MCP_ALLOWED_HOSTS,
+	allowedOrigins: env.MCP_ALLOWED_HOSTS,
+});
 
 app.get("/health", (c) => c.json({ status: "ok" }));
 

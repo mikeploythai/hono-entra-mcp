@@ -2,7 +2,10 @@
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "hono-entra-mcp",
 	"main": "src/index.ts",
-	"compatibility_date": "2026-08-14"
+	"compatibility_date": "2026-08-14",
+	"vars": {
+		"MCP_ALLOWED_HOSTS": ["ai.ploythai.dev", "localhost"]
+	}
 	// "compatibility_flags": [
 	//   "nodejs_compat"
 	// ],

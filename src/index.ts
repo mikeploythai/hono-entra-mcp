@@ -24,29 +24,41 @@ const handler = createMcpHandler(async ({ authInfo }) => {
 	);
 
 	const userId = z.string().min(1).safeParse(authInfo?.extra?.objectId);
-	let canDelete = false;
 
-	if (userId.success) {
+	const isDestructiveGroupMember = async () => {
+		if (!userId.success) return false;
+
 		try {
-			canDelete = await isGroupMember(
-				userId.data,
-				env.ENTRA_DESTRUCTIVE_GROUP_ID,
-			);
-		} catch {}
-	}
+			return await isGroupMember(userId.data, env.ENTRA_DESTRUCTIVE_GROUP_ID);
+		} catch {
+			return false;
+		}
+	};
 
-	if (canDelete) {
-		server.registerTool(
-			"delete-note",
-			{
-				description: "Delete a note",
-				inputSchema: z.object({ id: z.string() }),
-			},
-			async ({ id }) => ({
-				content: [{ type: "text", text: `Deleted: ${id}` }],
-			}),
-		);
-	}
+	const canDelete = await isDestructiveGroupMember();
+
+	server.registerTool(
+		"delete-note",
+		{
+			description: "Delete a note",
+			inputSchema: z.object({ id: z.string() }),
+		},
+		async ({ id }) => {
+			if (!canDelete) {
+				return {
+					content: [
+						{
+							type: "text",
+							text: "You do not currently have permission to delete notes.",
+						},
+					],
+					isError: true,
+				};
+			}
+
+			return { content: [{ type: "text", text: `Deleted: ${id}` }] };
+		},
+	);
 
 	return server;
 });

@@ -8,13 +8,15 @@ You need:
 
 - Node.js LTS
 
-- [pnpm](https://pnpm.io/installation#using-npm)
+- pnpm
 
 - Text editor, like [Cursor](https://cursor.com/home) or [Visual Studio Code](https://code.visualstudio.com)
 
-- Azure account for Entra ID authentication
+- Microsoft Entra
 
-- Cloudflare for hosting this server as a [worker](https://cloudflare.com/en-in/developer-platform/products/workers)
+- Cloudflare Workers
+
+- Claude
 
 ## Microsoft Entra Setup
 
@@ -166,4 +168,4 @@ Create or edit the custom connector in Claude:
 
 ***
 
-Heavy WIP. I hate Azure btw.
+I hate Azure btw
